@@ -1,5 +1,6 @@
 const router = require('express').Router()
 const User = require('../models/user')
+const ActiveUser = require('../models/active-users')
 const bcrypt = require('bcrypt')
 
 router.get('/', async (request, response, next) => {
@@ -36,6 +37,10 @@ router.post('/', async (request, response, next) => {
   })
   try {
     const savedUser = await user.save()
+    await ActiveUser.create({
+      username,
+      active: true,
+    })
     response.status(201).json(savedUser)
   } catch (error) {
     next(error)

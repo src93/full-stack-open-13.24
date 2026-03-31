@@ -1,4 +1,5 @@
 const jwt = require('jsonwebtoken')
+const Session = require('../models/sessions')
 
 const errorHandler = (error, request, response, next) => {
   const errors = {
@@ -26,7 +27,7 @@ const tokenExtractor = (request, response, next) => {
   next()
 }
 
-const userExtractor = (request, response, next) => {
+const userExtractor = async (request, response, next) => {
   const token = request.token
   console.log('Extracted token:', token)
   if (!token) {
@@ -40,6 +41,12 @@ const userExtractor = (request, response, next) => {
     if (!decodedToken.id) {
       return response.status(401).json({
         error: 'token missing or invalid'
+      })
+    }
+    const session = await Session.findOne({ where: { token } })
+    if (!session) {
+      return response.status(401).json({
+        error: 'User session not found. Please log in again.'
       })
     }
   } catch (error) {
